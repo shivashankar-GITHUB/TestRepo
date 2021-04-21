@@ -1,0 +1,82 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule created="1592913795922" id="4028698172db561f0172e10f9b51047d" language="beanshell" modified="1592918214013" name="Test Rule Library">
+  <Source>
+  import sailpoint.object.Identity; 
+  import sailpoint.object.*;
+  import sailpoint.object.ProvisioningPlan;
+  import sailpoint.object.ProvisioningPlan.AccountRequest;
+  import sailpoint.persistence.Sequencer;  
+  import sailpoint.object.Link;
+  import sailpoint.object.Application;
+
+  
+  
+public void createWorkItem(String caSafeName,String operation)
+{
+  Calendar expiration = Calendar.getInstance();
+  //expiration.add(Calendar.HOUR, 1);
+  List objectRequestList = new ArrayList();
+         System.out.println("caSafeName.." + caSafeName);
+          Identity targetIdentity = context.getObjectByName(Identity.class, caSafeName);    
+          Identity requester = context.getObjectByName(Identity.class, "spadmin");
+          Application appEIS =  context.getObjectByName(Application.class, "AD");
+          Link identityLink = targetIdentity.getLink(appEIS);
+
+          WorkItem item = new WorkItem();    
+          item.setType(WorkItem.Type.ManualAction);    
+          item.setOwner(context.getObjectByName(Identity.class, "CAProvisionQueue"));    
+          item.setRequester(requester);    
+          Sequencer sequencer = new Sequencer();    
+          item.setName(sequencer.generateId(context, item));    
+          item.setRenderer("lcmManualActionsRenderer.xhtml");    
+          item.setLevel(WorkItem.Level.Normal);    
+          item.setTarget(targetIdentity);    
+          item.setTargetClass(Identity.class.getName());    
+          item.setDescription("Manual Changes requested for User: "+targetIdentity.getDisplayableName());    
+          item.setHandler("sailpoint.api.Workflower");    
+          item.setExpiration(expiration.getTime());
+          item.setState(WorkItem.State.Pending);
+
+          Attributes attributes = new Attributes();    
+          item.setAttributes(attributes);    
+
+          ApprovalSet approvalSet = new ApprovalSet();    
+          ApprovalItem approvalItem = new ApprovalItem();    
+          approvalItem.setApplication("CyberArk Provisioning");    
+          approvalItem.setNativeIdentity(targetIdentity.getName()); 
+          if("Create".equalsIgnoreCase(operation))
+            approvalItem.setOperation("Create");
+          else
+            approvalItem.setOperation("Delete");
+          StringBuilder sb = new StringBuilder();
+          sb.append("Type=\"Privileged\";");
+           if("Create".equalsIgnoreCase(operation))
+            sb.append("Operation=\"Create\";");
+          else
+            sb.append("Operation=\"Delete\";");
+          sb.append("SafeName=\"pers_" + targetIdentity.getName() + "\";");
+          sb.append("SafeMember=\""+ identityLink.getDisplayName()  +  "\";");
+          sb.append("UserName=\"y-"+ targetIdentity.getName() +  "\";");
+          sb.append("Address=\"eis.equifax.com\";");
+
+          sb.append("Platform=\"AD_OS_US_SYT_ERS_PSM_16C_7D_7D_AC_AV_AR\";");   
+
+          sb.append("AccountName=\"eis.equifax.com-y" +targetIdentity.getName() + "\";");
+          approvalItem.setValue(sb.toString());    
+          approvalSet.add(approvalItem);    
+
+          attributes.put("approvalSet", approvalSet);    
+          attributes.put("identityDisplayName", targetIdentity.getDisplayableName());    
+          attributes.put("identityName", targetIdentity.getName());    
+
+          System.out.println("PrivAcctDetail - "+ sb.toString());
+
+          context.startTransaction();    
+          context.saveObject(item);    
+          context.commitTransaction(); 
+        }
+      
+
+  </Source>
+</Rule>

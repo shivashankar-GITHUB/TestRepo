@@ -1,0 +1,63 @@
+import sailpoint.api.Provisioner;
+import sailpoint.object.ProvisioningPlan;
+import sailpoint.object.ProvisioningPlan.AccountRequest;
+import sailpoint.object.ProvisioningPlan.AttributeRequest;
+import sailpoint.object.Identity;
+import sailpoint.object.ProvisioningPlan;
+import sailpoint.object.ProvisioningProject;
+
+
+
+		
+	ProvisioningPlan plan = new ProvisioningPlan();
+	
+	 
+	 AccountRequest req = new AccountRequest();
+	 Identity identity1 = context.getObject(Identity.class,"demo");
+	
+	 
+	 
+	 plan.setIdentity(identity1);
+
+
+		AccountRequest accReq = new AccountRequest();
+        accReq.setNativeIdentity("CN="+displayName+",CN=Users,DC=seri,DC=sailpointdemo,DC=com");
+        accReq.setApplication("AD App");
+        accReq.setOperation(ProvisioningPlan.AccountRequest.Operation.Create);
+
+		AttributeRequest snReq = new AttributeRequest();
+		snReq.setName("sn");
+		snReq.setOperation(ProvisioningPlan.Operation.Add);
+		snReq.setValue("test");
+		accReq.add(snReq);
+
+		AttributeRequest gnReq = new AttributeRequest();
+		gnReq.setName("givenName");
+		gnReq.setOperation(ProvisioningPlan.Operation.Add);
+		gnReq.setValue("demo");
+		accReq.add(gnReq);
+
+		AttributeRequest sAMAReq = new AttributeRequest();
+		sAMAReq.setName("sAMAccountName");
+		sAMAReq.setOperation(ProvisioningPlan.Operation.Add);
+		sAMAReq.setValue("demo");
+		accReq.add(sAMAReq);
+
+		AttributeRequest pwdReq = new AttributeRequest();
+		pwdReq.setName("password");
+		pwdReq.setOperation(ProvisioningPlan.Operation.Add);
+		pwdReq.setValue("admin");
+		accReq.add(pwdReq);
+
+		plan.add(accReq);
+
+	
+		if (plan != null) {
+        	System.out.println("plan========>" + plan.toXml());
+			
+			Provisioner prov = new Provisioner(context);
+			ProvisioningProject masterPlan= prov.compile(plan);
+        System.out.println("masterPlan=============>"+masterPlan.toXml());
+			prov.execute(masterPlan);
+			
+		}

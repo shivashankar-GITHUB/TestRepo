@@ -1,0 +1,498 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+   xmlns:f="http://java.sun.com/jsf/core"
+   xmlns:p="http://primefaces.org/ui"
+   xmlns:h="http://java.sun.com/jsf/html"
+   xmlns:ui="http://java.sun.com/jsf/facelets">
+   <body>
+      <ui:define name="headerItems">
+         <ui:include src="header.xhtml"></ui:include>
+      </ui:define>
+      <ui:composition template="/ngAppPage.xhtml">
+         <ui:define name="title">Ad Group Form</ui:define>
+         <ui:define name="body">
+           <style>
+              .heading i{
+                /*width: 25px;
+                height: 25px;*/
+                margin: 10px;
+                text-align: center;
+                /*padding-top: 5px;*/
+                cursor: pointer;
+                font-size: 20px;
+                position: relative;
+                top: 6px;
+              }
+              .form{
+                background-color: #f0f0f0;
+                width: 100%;
+                height: 100%;
+              }
+              .form .panel-title{
+                font-size: 15px;
+                font-weight: 700;
+                color: #011e69;
+              }
+              .text{
+                font-size: 24px;
+                font-weight: 600;
+                vertical-align: middle;
+              }
+              .required i{
+                color: red;
+                font-size: 5px;
+              }
+              label{
+                color: #928b91;
+              }
+              .form-heading{
+                padding: 10px;
+                background: linear-gradient(to top, #9ddcec, #fff);
+              }
+              .form-heading span{
+                color: #183B76;
+              }
+              .sp-body-container {
+                background: #f0f0f0;
+              }
+              .form-control{
+                border-radius: 5px;
+                border-color:#aaa;
+                color: #666;  
+              }
+
+              select.form-control{
+                background: url(data:image/svg+xml;base64,iVBORw0KGgoAAAANSUhEUgAAAAcAAAAHCAYAAADEUlfTAAAAG0lEQVR42mNgwAfKy8v/48I4FeA0AacVDFQBAP9wJkE/KhUMAAAAAElFTkSuQmCC) no-repeat 100% 50%;
+                -webkit-appearance: none;
+                -moz-appearance: none;
+                appearance: none;
+                background-size: 12px 12px;
+                background-position: 98%
+              }
+
+              .form-control:focus{
+                border-color:#000;
+              }
+              .form ul{
+                padding-left: 30px;
+                color: #717171;
+              }
+              .form ul a{
+                color: #005595 !important
+              }
+              .form .btn.btn-default{
+                background: white;
+                color: #928b91 !important
+              }
+              .form .btn.btn-primary{
+                background-color:#002668;
+              }
+              .form .btn.btn-primary:hover{
+                color:#fff !important;
+              }
+              .text-success{
+                color: green !important;
+              }
+              ul.nav.nav-tabs{
+                padding-left: 0px;
+              }
+              ul.nav.nav-tabs li {
+                width: 180px;
+                text-align: center;
+                margin-right: 5px;
+              }
+              .details_tabs li.active a ,.details_tabs li.active a:hover{
+                  background: #00a4cf !important;
+                  color: #fff !important;
+                  border-color: #00a4cf !important;
+              }
+              .details_tabs li a,.details_tabs li a:hover {
+                  background: #fff !important;
+                  color: #545454 !important;
+                  border: 1px solid #183b76 !important;
+                  border-radius: 4px !important;
+              }
+              .select2-search__field {
+                 height: 30px;
+                 border-radius: 6px !important;
+              }
+              .select2-search {
+                 padding: 5px !important;
+                 border-radius: 2px !important;
+              }
+              .select2-search::after {
+                 top: 10px;
+              }
+
+
+          </style>
+
+    <div class="form-heading">
+        <span class="heading"><!-- <i class="fa fa-chevron-left" aria-hidden="true"></i> --></span><span class="text">AD Group Form</span>
+        <ul class="nav nav-tabs details_tabs acc_details_tabs mt-10">
+          <li class="active"><a data-toggle="tab" href="#createform">Create</a></li>
+          <li onclick="defaultShowUpdateForm();"><a data-toggle="tab" href="#updateform" >Update</a></li>
+          <li onclick="defaultDeleteSuccess();"><a data-toggle="tab" href="#deleteform">Delete</a></li>
+        </ul>
+    </div>
+    <div class="form">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-2" style="padding-top: 25px;">
+                 <div class="manage_profile"> 
+                    <h:panelGroup layout="block"  rendered="#{dashboardBean.currentUserImage().isEmpty()?'false':'true'}">
+                       <div class="admin_dp">
+                          <img src="data:image/jpg;base64,${dashboardBean.currentUserImage()}" class="access_owner_img w-100"/>
+                       </div>
+                    </h:panelGroup>
+                    <h:panelGroup layout="block"  rendered="#{dashboardBean.currentUserImage().isEmpty()?'true':'false'}">
+                       <div class="admin_dp_dummy media_admin_dp">
+                          <img src="#{base.requestContextPath}/img/no-pic.png" width="100%" />
+                       </div>
+                    </h:panelGroup>
+                    <div class="nme-sty">
+                       <span class="fnt-sz-12 img_title pb-0 text-ellipsis" title="#{dashboardBean.currentUserName()}">#{dashboardBean.currentUserName()}</span><br/>
+                       <h:panelGroup rendered="#{not empty dashboardBean.currentUserJobTitle()}">
+                         <span class="fnt-sz-20 job_title text-ellipsis" style="font-size: 16px;padding: 0px 5px;" title="#{dashboardBean.currentUserJobTitle()}">#{dashboardBean.currentUserJobTitle()}</span>
+                       </h:panelGroup>
+                    </div>
+                 </div> 
+                </div>                
+                <div class="tab-content"> 
+                  <div id="createform" class="col-md-8 createform tab-pane fade in active" style="padding-top: 25px;">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                          <h3 class="panel-title">Allegiant Create AD Group</h3>
+                        </div>
+                        <div class="panel-body">
+                        <form>
+                              <div class="form-group">
+                                <label for="displayName">Display Name (User friendly name) <sup class="required"><i class="fa fa-star" aria-hidden="true"></i></sup></label>
+                                <input type="text" class="form-control" id="displayName"/>
+                                <span id="helpBlock" class="help-block">Tool Tip: Enter The Value to be displayed To the Users when using Access Request.</span>
+                              </div>
+                              <div class="form-group">
+                                <label for="ouGroupLocation">OU Group Location <sup class="required"><i class="fa fa-star" aria-hidden="true"></i></sup></label>
+                                <select class="form-control filter_dep filter_items_dd" data-placeholder="-- Select --" data-tabindex="1">
+                                  <option>-- Select --</option> 
+                                </select>
+                                <span id="helpBlock" class="help-block">Tool Tip:Select OU from Group OUs present on OU Group Location Dropdown List.</span>
+                              </div>
+                              <div class="form-group">
+                                <label for="adGroupName">AD Group Name <sup class="required"><i class="fa fa-star" aria-hidden="true"></i></sup></label>
+                                <input type="text" class="form-control" id="adGroupName"/>
+                                <span id="helpBlock" class="help-block">Tool Tip:This Is The AD Group Name.</span>
+                              </div>
+                              <div class="checkbox">
+                                <label>
+                                  <input type="checkbox" value="Requestable"/>
+                                  Requestable
+                                </label>
+                              </div>
+                              <span id="helpBlock" class="help-block">Tool Tip:Should This Group be Requestable by the General population of the Users?</span>
+                              <div class="form-group">
+                                <label for="Description">Description <sup class="required"><i class="fa fa-star" aria-hidden="true"></i></sup></label>
+                                <input type="text" class="form-control" id="Description" /> <hr/>
+                                <span id="helpBlock" class="help-block">Tool Tip:This is the group Description (as detailed as possible) please populate the description according to the examples on this confluence Page:.</span>
+                              </div>
+                              <ul>
+                                  <li><a href="#">Allegiant</a></li>
+                              </ul><hr/>
+                              <div class="form-group">
+                                <label for="Owner">Owner <sup class="required"><i class="fa fa-star" aria-hidden="true"></i></sup></label>
+                                <select class="form-control filter_dep filter_items_dd" data-placeholder="-- Select --" data-tabindex="1">
+                                  <option>-- Select --</option> 
+                                </select>
+                                <span id="helpBlock" class="help-block">Tool Tip:Select The Person responsible for this group for approvals and management, and for distribution group select the person who his having the mailbox.</span>
+                              </div>
+                              <div class="form-group">
+                                <label for="Scope">Scope</label>
+                                <select class="form-control filter_dep filter_items_dd" data-placeholder="-- Select --" data-tabindex="1">
+                                  <option>-- Select --</option> 
+                                </select>
+                                <span id="helpBlock" class="help-block">Tool Tip:Select A scope only if this should be seen by a specific set of Users.</span>
+                              </div>
+                              <div class="form-group">
+                                <label for="Scope">Approval Level <sup class="required"><i class="fa fa-star" aria-hidden="true"></i></sup></label>
+                                <select class="form-control filter_dep filter_items_dd" data-placeholder="-- Select --" data-tabindex="1">
+                                  <option>-- Select --</option> 
+                                </select>
+                                <span id="helpBlock" class="help-block">Tool Tip:Please Select appropriate approval level (check documentation) (stored in extensionattribute2).</span>
+                              </div><hr/>
+                              <span id="helpBlock" class="help-block">Tool Tip:</span>
+                              <ul>
+                                  <li>Approval level is 1: Manger Approval is Required</li>
+                                  <li>Approval level is 2: Manger Approval and then AD application owners approval also required</li>
+                                  <li>Approval level is 3: Manger Approval and AD application owners approval and 3rd level approval also required. Example:</li>
+                              </ul><hr/>
+                              <span>Group type</span>
+                              <div class="radio">
+                                <label>
+                                  <input type="radio" name="security" id="security" value="security" checked="true" />
+                                  Security
+                                </label>
+                              </div>
+                              <div class="radio">
+                                <label>
+                                  <input type="radio" name="distribution" id="distribution" value="distribution" />
+                                  Distribution
+                                </label>
+                              </div>
+                              <span id="helpBlock" class="help-block">Tool Tip:Select the Appropriate Group Type</span>
+                              <div class="form-group">
+                                <label for="groupScope">Group Scope</label>
+                                <select class="form-control filter_dep filter_items_dd" data-placeholder="-- Select --" data-tabindex="1">
+                                  <option value="Universal">Universal</option> 
+                                </select>
+                              </div>
+                              <div class="form-group">
+                                <label for="exchangeAlias">Exchange Alias</label>
+                                <input type="text" class="form-control" id="exchangeAlias" />
+                                <span id="helpBlock" class="help-block">This will become the Emain address of the group if creating a distribution.</span>
+                              </div>
+                              <div class="form-group">
+                                <label for="type">Type <sup class="required"><i class="fa fa-star" aria-hidden="true"></i></sup></label>
+                                <input type="text" class="form-control" id="type" placeholder="Group" disabled="true" />
+                              </div>
+                              <div class="form-group">
+                                <label for="attribute">Attribute <sup class="required"><i class="fa fa-star" aria-hidden="true"></i></sup></label>
+                                <input type="text" class="form-control" id="attribute" placeholder="memberof" disabled="true" />
+                              </div>
+                              <div class="form-group">
+                                <label for="value">Value <sup class="required"><i class="fa fa-star" aria-hidden="true"></i></sup></label>
+                                <input type="text" class="form-control" id="value" placeholder="" disabled="true" />
+                              </div>
+                              <div class="form-group">
+                                <label for="groupdn">Group DN <sup class="required"><i class="fa fa-star" aria-hidden="true"></i></sup></label>
+                                <input type="text" class="form-control" id="groupdn" placeholder="" disabled="true" />
+                              </div>
+                              <div class="form-group">
+                                <label for="samaaccountname">SAMAAccountName <sup class="required"><i class="fa fa-star" aria-hidden="true"></i></sup></label>
+                                <input type="text" class="form-control" id="samaaccountname" placeholder="" disabled="true" />
+                                <span id="helpBlock" class="help-block">This is the AD Group name.</span>
+                              </div>
+                              <div class="form-group">
+                                <label for="description">Description <sup class="required"><i class="fa fa-star" aria-hidden="true"></i></sup></label>
+                                <input type="text" class="form-control" id="description" placeholder="" disabled="true" />
+                              </div>
+                            </form>
+                        </div>
+                        <div class="panel-footer">
+                            <a href="#{base.requestContextPath}/home.jsf" class="btn btn-default">Cancel</a>
+                            <button type="button" class="btn btn-primary" style="float: right;">Create</button>
+                        </div>
+                      </div>
+                  </div>
+                  
+                  <div id="deleteform" class="tab-pane fade">
+                      <div class="col-md-8 deleteform" style="padding-top: 25px;">
+                          <div class="panel panel-default">
+                              <div class="panel-heading">
+                                <h3 class="panel-title">Allegiant - Select Group to Delete</h3>
+                              </div>
+                              <div class="panel-body">
+                              <p class="delete" style="font-size: 20px;">Delete Groups</p>
+                              <div class="row">
+                                  <div class="col-md-6 p-0">
+                                      <form>
+                                          <div class="form-group">
+                                            <label for="groupdelete">Select Group to Delete <sup class="required"><i class="fa fa-star" aria-hidden="true"></i></sup> </label>
+                                            <select class="form-control filter_dep filter_items_dd" data-placeholder="-- Select --" data-tabindex="1">
+                                              <option>--select--</option>
+                                              <option>The ADGroup</option>
+                                              <option>The ADGroup one</option>
+                                              <option>The ADGroup two</option>
+                                              <option>The ADGroup three</option>
+                                              <option>The ADGroup four</option>  
+                                            </select>
+                                          </div>
+                                        </form>
+                                  </div>
+                               </div>
+                              </div>
+                              <div class="panel-footer">
+                                  <a href="#{base.requestContextPath}/home.jsf" class="btn btn-default">Cancel</a>
+                                  <button type="button" class="btn btn-primary" onclick="deleteSuccess();" style="float: right;">Delete</button>
+                              </div>
+                            </div>
+                      </div>
+                      <div class="deleteformmsg" style="display: none;">
+                      <div class="col-md-8" style="padding-top: 25px;">
+                          <div class="panel panel-default">
+                              <div class="panel-heading">
+                                <h3 class="panel-title">Allegiant AD Group Results</h3>
+                              </div>
+                              <div class="panel-body">
+                              <p class="delete text-success">The AD group CN=Testsixgroup</p>
+                              
+                              </div>
+                              <div class="panel-footer">
+                                  <button type="button" class="btn btn-primary" onclick="defaultDeleteSuccess();">Finish</button>
+                              </div>
+                            </div>
+                      </div>
+                  </div>
+                  </div>
+                  <div id="updateform" class="tab-pane fade">
+                      <div class="col-md-8 updateform" style="padding-top: 25px;">
+                          <div class="panel panel-default">
+                              <div class="panel-heading">
+                                <h3 class="panel-title">Allegiant - Select Group </h3>
+                              </div>
+                              <div class="panel-body">
+                              <p  style="font-size: 20px;">Update Groups</p>
+                              <div class="row">
+                                  <div class="col-md-6 p-0">
+                                      <form>
+                                          <div class="form-group">
+                                            <label for="updategroup">Select Group <sup class="required"><i class="fa fa-star" aria-hidden="true"></i></sup> </label>
+                                            <select class="form-control filter_dep filter_items_dd" data-placeholder="-- Select --" data-tabindex="1">
+                                              <option>--select--</option>
+                                              <option>TestAD_group4</option>
+                                              <option>Test Group one</option> 
+                                              <option>TestAD_group30</option> 
+                                              <option>TestAD_group1</option> 
+                                              <option>TestAD_group2</option> 
+                                              <option>TestAD_group3</option>  
+                                            </select>
+                                          </div>
+                                        </form>
+                                  </div>
+                               </div>
+                              </div>
+                              <div class="panel-footer">
+                                  <a href="#{base.requestContextPath}/home.jsf" class="btn btn-default">Cancel</a>
+                                  <button type="button" class="btn btn-primary" style="float: right;" onclick="showUpdateForm()">Next</button>
+                              </div>
+                            </div>
+                      </div>
+                      <div class="col-md-8 updateform2" style="display: none;padding-top: 25px;">
+                      <div class="panel panel-default">
+                          <div class="panel-heading">
+                            <h3 class="panel-title">Allegiant Update AD Group</h3>
+                          </div>
+                          <div class="panel-body">
+                          <form>
+                                <div class="form-group">
+                                  <label for="displayName">sAMAccountName </label>
+                                  <input type="text" class="form-control" id="displayName" value="TestAD_group4" disabled="true"/>
+                                  <span id="helpBlock" class="help-block">This is AD group name.</span>
+                                </div>
+                                <div class="form-group">
+                                  <label for="adGroupName">Value</label>
+                                  <input type="text" class="form-control" id="adGroupName" value="CN=TestAD_group4,OU=Application Groups,OU=Groups,OU=UsersandComputers,DC=sb1,DC=iamsdlc,DC=corp" disabled="true"/>
+                                  <span id="helpBlock" class="help-block">This is AD group value.</span>
+                                </div>
+                                <div class="form-group">
+                                  <label for="adGroupName">groupType</label>
+                                  <input type="text" class="form-control" id="adGroupName" value="Security" disabled="true"/>
+                                </div>
+                                <div class="form-group">
+                                  <label for="adGroupName">AD Group Name</label>
+                                  <input type="text" class="form-control" id="adGroupName" value="TestAD_group4"/>
+                                  <span id="helpBlock" class="help-block">This is AD group name.</span>
+                                </div>
+                                <div class="checkbox">
+                                  <label>
+                                    <input type="checkbox" value="Requestable" checked="true"/>
+                                    Requestable
+                                  </label>
+                                </div>
+                                <span id="helpBlock" class="help-block">Tool Tip:Should This Group be Requestable by the General population of the Users?</span>
+                                <div class="form-group">
+                                  <label for="Description">Description <sup class="required"><i class="fa fa-star" aria-hidden="true"></i></sup></label>
+                                  <input type="text" class="form-control" id="Description" value="addeddwscription" /> <hr/>
+                                  <span id="helpBlock" class="help-block">This is the group description (as detailed as possible), please make sure description follows standars.</span>
+                                </div>
+                                <ul>
+                                    <li>Ex: APP AIS PRD - Access to Air Only bookings in AIS (needed in addition to AIS access) - DO NOT AUTO PROVISION FOR STATIONS JOB CODES</li>
+                                    <li>Ex: FILE - ITFiles Shared (R:) drive - Modify<a href="#"> \allegiantair\shares\ITFiles</a></li>
+                                </ul><hr/>
+                                <div class="form-group">
+                                  <label for="Scope">Scope</label>
+                                  <select class="form-control filter_dep filter_items_dd" data-placeholder="-- Select --" data-tabindex="1">
+                                    <option>Contractor</option> 
+                                  </select>
+                                  <span id="helpBlock" class="help-block">Tool Tip:Select A scope only if this should be seen by a specific set of Users.</span>
+                                </div>
+                                <div class="form-group">
+                                  <label for="Owner">Owner <sup class="required"><i class="fa fa-star" aria-hidden="true"></i></sup></label>
+                                  <select class="form-control filter_dep filter_items_dd" data-placeholder="-- Select --" data-tabindex="1">
+                                    <option>D. Mahesh Goud</option> 
+                                  </select>
+                                  <span id="helpBlock" class="help-block">Tool Tip:Select The Person responsible for this group for approvals and management, and for distribution group select the person who his having the mailbox.</span>
+                                </div>
+                                <div class="form-group">
+                                  <label for="Scope">Approval Level <sup class="required"><i class="fa fa-star" aria-hidden="true"></i></sup></label>
+                                  <select class="form-control filter_dep filter_items_dd" data-placeholder="-- Select --" data-tabindex="1">
+                                    <option>3</option> 
+                                  </select>
+                                  <span id="helpBlock" class="help-block">Tool Tip:Please Select appropriate approval level (check documentation) (stored in extensionattribute2).</span>
+                                </div><hr/>
+                                <span id="helpBlock" class="help-block">Tool Tip:</span>
+                                <ul>
+                                    <li>Approval level is 1: Manger Approval is Required</li>
+                                    <li>Approval level is 2: Manger Approval and then AD application owners approval also required</li>
+                                    <li>Approval level is 3: Manger Approval and AD application owners approval and 3rd level approval also required. Example:</li>
+                                </ul><hr/>
+                                <div class="form-group">
+                                  <label for="displayName">User Friendly Name</label>
+                                  <input type="text" class="form-control" id="displayName"/>
+                                </div><hr/>
+                                <span id="helpBlock" class="help-block">This will be the field displayed to users in Pipeline when requesting access (stored in extensionAttribute4): </span>
+                                <ul>
+                                    <li>Ex: AIS access to Air Only bookings in PRD</li>
+                                    <li>Ex: ITFiles folder Modify Access</li>
+                                </ul><hr/>
+                                <div class="form-group">
+                                  <label for="groupScope">Group Scope</label>
+                                  <select class="form-control filter_dep filter_items_dd" data-placeholder="-- Select --" data-tabindex="1">
+                                    <option value="Universal">Global</option> 
+                                  </select>
+                                </div>
+                              </form>
+                          </div>
+                          <div class="panel-footer">
+                              <a onclick="defaultShowUpdateForm();" class="btn btn-default">Back</a>
+                              <button type="button" class="btn btn-primary" style="float: right;">Update</button>
+                          </div>
+                        </div>
+                  </div>
+                  </div>
+                </div> 
+            </div>
+        </div>
+    </div>
+   
+    
+    <script>
+      //<![CDATA[ 
+        $(document).ready(function(){
+          $('.filter_dep').select2();
+        });
+        function showUpdateForm(){
+          $('.updateform').hide();
+          $('.updateform2').show();
+        }
+
+        function deleteSuccess(){
+          $(".deleteform").hide();
+          $(".deleteformmsg").show();
+        }
+
+        function defaultShowUpdateForm(){
+          $('.updateform').show();
+          $('.updateform2').hide();
+        }
+
+        function defaultDeleteSuccess(){
+          $(".deleteform").show();
+          $(".deleteformmsg").hide();
+        }
+     //]]>
+    </script>
+         </ui:define>
+      </ui:composition>
+   </body>
+</html>
+

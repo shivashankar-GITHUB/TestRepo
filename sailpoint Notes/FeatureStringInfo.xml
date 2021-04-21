@@ -1,0 +1,48 @@
+C:\Program Files\Apache Software Foundation\Tomcat 9.0\webapps\identityiq71\doc\javadoc\sailpoint\object\Application.Feature.html
+https://community.sailpoint.com/t5/IdentityIQ-Forum/What-are-the-Feature-Strings-for-Applications-and-what-do-they/m-p/81458
+
+
+AUTHENTICATE - The application supports pass through authentication.
+
+COMPOSITE - The application support composite application creation.
+
+DIRECT_PERMISSIONS - The application supports returning DirectPermissions.
+
+DISCOVER_SCHEMA - The application supports discovering schemas for users and groups.
+
+ENABLE - The application supports reading if an account is enabled or disabled.
+
+MANAGER_LOOKUP - The application supports looking up managers as they are encountered in a feed. This is the opposite of NO_RANDOM_ACCESS.
+
+NO_RANDOM_ACCESS - The application does not support random access and the getObject() methods should not be called and expected to perform.
+
+PROXY -The application can serve as a proxy for another application.  When an application has a proxy, all connector calls made with that application are redirected through the connector for the proxy application.
+
+SEARCH - The Application supports filtered search in a scalable way.
+
+TEMPLATE -
+
+UNLOCK - The application supports reading if an account is locked or unlocked.
+
+UNSTRUCTURED_TARGETS - The application supports returning unstructured Targets.
+
+PROVISIONING - The application can both read and write accounts. Having this feature implies that the provision() method is implemented.  It also means that direct and target permissions can also be provisioned if they can be returned by aggregation.
+
+GROUP_PROVISIONING - The application can both read and write groups. Having this feature implies that the provision() method is implemented.
+          
+
+SYNC_PROVISIONING - The application can provision accounts synchronously.
+
+PASSWORD - The application can provision password changes. Since applications can never read passwords this is should only be used in conjunction with the PROVISIONING feature.
+
+CURRENT_PASSWORD - Some application types support verification of the current password
+
+ACCOUNT_ONLY_REQUEST - The application supports requesting accounts without entitlements.
+
+ADDITIONAL_ACCOUNT_REQUEST - The application supports requesting additional accounts.
+
+NO_AGGREGATION - An application that does not support aggregation.
+
+GROUPS_HAVE_MEMBERS - The application models group memberships with a member attribute on the group object rather than a groups attribute on the account object. This effects the implementation of delta account aggregation.
+
+NO_PERMISSIONS_PROVISIONING - Indicates that the connector cannot provision direct or target permissions for accounts.

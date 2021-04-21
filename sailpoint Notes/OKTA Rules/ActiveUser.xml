@@ -1,0 +1,38 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule created="1601964421006" id="c0a8e90174ea1e3e8174fc852f8e06f5" language="beanshell" modified="1601979208326" name="test rule">
+  <Source>
+  import sailpoint.object.ProvisioningPlan;
+  import sailpoint.object.Identity;
+  import sailpoint.object.ProvisioningPlan.AccountRequest;
+  import sailpoint.object.ProvisioningPlan.AttributeRequest;
+  import sailpoint.api.Provisioner;
+  import sailpoint.object.ProvisioningProject;
+
+
+  import com.squareup.okhttp.MediaType;
+  import com.squareup.okhttp.OkHttpClient;
+  import com.squareup.okhttp.Request;
+  import com.squareup.okhttp.RequestBody;
+  import com.squareup.okhttp.Response;
+
+
+
+
+  OkHttpClient client = new OkHttpClient();
+  MediaType mediaType = MediaType.parse("Application/JSON");
+  RequestBody body = RequestBody.create(mediaType, "");
+  Request request = new Request.Builder()
+    .url("https://dev-697476-admin.okta.com/api/v1/users/00u6qm4lYiiMIneEd5d5/lifecycle/activate?sendEmail=true")
+    .method("POST", body)
+    .addHeader("Authorization", "SSWS 00gjkImmlSU7pm2XFmnDMebh3NJsCwB56s7edPwPmQ")
+    .addHeader("Content-Type", "Application/JSON")
+    .addHeader("Accept", "Application/JSON")
+    .addHeader("Cookie", "DT=DI0uzxGh0R-QlipNKAWR8NapQ; JSESSIONID=86A29C17C684C1FAF39C521EEAEC0748")
+    .build();
+  Response response = client.newCall(request).execute();
+  // return project.toXml();
+  return response.body().string();
+
+  </Source>
+</Rule>

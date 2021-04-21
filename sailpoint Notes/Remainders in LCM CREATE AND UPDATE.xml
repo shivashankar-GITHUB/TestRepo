@@ -1,0 +1,100 @@
+<InterceptorScript>
+<Source>
+import sailpoint.object.Workflow;
+import java.text.DateFormat;
+import sailpoint.object.IdentityRequest;
+import sailpoint.object.WorkItem;
+import sailpoint.object.EmailTemplate;
+import sailpoint.object.NotificationConfig;
+import sailpoint.object.NotificationConfig.ReminderConfig;
+import sailpoint.object.NotificationConfig.EscalationConfig;
+import sailpoint.object.IdentityRequestItem;
+import sailpoint.object.Custom;
+
+import java.util.concurrent.TimeUnit;
+
+  if (method != null &amp;&amp; method.equals(Workflow.INTERCEPTOR_OPEN_WORK_ITEM)) {
+   if (workflow != null) {
+    if (item != null &amp;&amp; context != null) {
+     long initialReminder = 0;
+     Custom customObj = context.getObjectByName(Custom.class, "Reminders Custom Object");
+     List managerConfigs = new ArrayList();
+     //first reminder at 5th day adjust milliseconds as per your  
+     ReminderConfig firstReminderConfig = new ReminderConfig();
+     firstReminderConfig.setEnabled(true);
+     firstReminderConfig.setMillis(432000000);
+     firstReminderConfig.setEmailTemplateName("emailtemplate to notify");
+     managerConfigs.add(firstReminderConfig);
+     //first reminder at 9th day adjust milliseconds as per your 
+     ReminderConfig secondReminderConfig = new ReminderConfig();
+     secondReminderConfig.setEnabled(true);
+     secondReminderConfig.setMillis(777600000);
+     secondReminderConfig.setEmailTemplateName("emailtemplate to notify");
+     managerConfigs.add(secondReminderConfig);
+     //first reminder at 10th day adjust milliseconds as per your 
+     ReminderConfig thridReminderConfig = new ReminderConfig();
+     thridReminderConfig.setEnabled(true);
+     thridReminderConfig.setMillis(864000000);
+     thridReminderConfig.setEmailTemplateName("emailtemplate to notify");
+     managerConfigs.add(thridReminderConfig);
+     
+     //first escalation at 11th day adjust milliseconds as per your 
+     EscalationConfig escalationConfig = new EscalationConfig();
+     // escalationConfig.setMaxReminders(3);
+     escalationConfig.setEnabled(true);
+     escalationConfig.setMillis(950400000);
+     escalationConfig.setEscalationRuleName("Rule_Escalation_Rule");
+     managerConfigs.add(escalationConfig);
+     
+     
+     NotificationConfig notifConfig = new NotificationConfig();
+     notifConfig.setEnabled(true);
+     notifConfig.setEscalationEnabled(true);
+     notifConfig.setRemindersEnabled(true);
+     Date currentDate = new Date();
+     notifConfig.setStartDate(currentDate);
+     long timeinMillis = currentDate.getTime();
+     //change your expiration days as per your requirement
+     int expirationDays = 15;
+     Date laterDate = new Date(timeinMillis + expirationDays * 24 * 3600 * 1000);
+     notifConfig.setEndDate(laterDate);// calculate End Date by
+              // adding 11 days
+     notifConfig.setConfigs(managerConfigs);
+     // notifConfig.setEscalationMaxReminders(3);
+     item.setupNotificationConfig(context, null, notifConfig);
+     context.saveObject(item);
+     context.commitTransaction();
+     if (item != null) {
+      log.debug("Workitem Name ::: " + item.getId());
+      wfcontext.setVariable("workItemName", item.getId());
+      WorkItem workItem = context.getObjectById(WorkItem.class, item.getId());
+      if (workItem != null) {
+       log.debug("Workitem XML ::: " + workItem.toXml());
+       String name = workItem.getName();
+       log.debug("***name :: WkItem: " + name);
+      }
+      log.debug("workItemName Varibale is ::" + wfcontext.getVariable("workItemName"));
+     }
+     String hoursTillExpiration = "264";
+     int hoursTillExpirationInt = Util.atoi(hoursTillExpiration);
+     if (hoursTillExpirationInt > 0) {
+      int minutes = hoursTillExpirationInt * 60;
+      Date dateExp = Util.incrementDateByMinutes(new Date(), minutes);
+      if (item != null &amp;&amp; item.getExpirationDate() == null &amp;&amp; dateExp != null) {
+       item.setExpiration(dateExp);
+       context.saveObject(item);
+       context.commitTransaction();
+       // log.debug("the new item is :"+item.toXml());
+       if (item != null) {
+        wfcontext.setVariable("actualWorkItem", item);
+       }
+       // log.debug("Approval Set******* :"+approvalSet);
+       log.debug(" No of Remainders Sent ******::: " + item.getReminders());
+      }
+     }
+    }
+   }
+  }
+
+</Source>
+</InterceptorScript>

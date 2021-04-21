@@ -1,0 +1,341 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule language="beanshell" name="ExportIdentityIQCapabilitiesAndSPRights">
+  
+  <Description>Generates data contains a list of all SPRight objects, Capability
+  objects, and their associations in CSV format.</Description>
+  
+  <Source><![CDATA[
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import org.apache.commons.lang.ObjectUtils;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.SystemUtils;
+import sailpoint.api.SailPointContext;
+import sailpoint.object.Capability;
+import sailpoint.object.QueryOptions;
+import sailpoint.object.SPRight;
+import sailpoint.tools.GeneralException;
+import sailpoint.tools.Internationalizer;
+import sailpoint.tools.Util;
+
+/**
+ * Convert the provided String array into CSV format.  We will double quote
+ * everything, and escape any existing double quotes within the description.
+ */
+String buildResult(String[][] data)
+{
+    StringBuilder sb = new StringBuilder();
+    
+    /**
+     * For each column (j) of each row (i).
+     */
+    
+    for (int i = 0 ; i < data.length ; i++)
+    {
+        for (int j = 0 ; j < data[i].length ; j++)
+        {
+            /**
+             * Only add commas after the first row...
+             */
+            
+            if (j != 0)
+            {
+                sb.append(',');
+            }
+            
+            /**
+             * Grab the cell in question and perform any required
+             * transformations.  In this case, escape any double quotes.
+             */
+            
+            String value = ObjectUtils.toString(data[i][j]);
+            
+            if (StringUtils.contains(value, '"'))
+            {
+                value = StringUtils.replace(value, "\"", "\"\"");
+            }
+            
+            /**
+             * Add our cell to the result surrounded by double quotes.
+             */
+            
+            sb.append('"');
+            sb.append(value);
+            sb.append('"');
+        }
+        
+        sb.append(SystemUtils.LINE_SEPARATOR);
+    }
+    
+    return sb.toString();
+}
+
+/**
+ * Return a list of all Capability object names.
+ */
+List getCapabilities() throws GeneralException
+{
+    ArrayList capabilitiesList = new ArrayList();
+    
+    /**
+     * Pull a list of Capability object names, alpha by name.  Build a list
+     * of names and return it.
+     */
+    
+    QueryOptions capabilitiesQO = new QueryOptions();
+    capabilitiesQO.addOrdering("name", true);
+    
+    Iterator capabilitiesIterator = null;
+    
+    try
+    {
+        capabilitiesIterator =
+                context.search(Capability.class, capabilitiesQO, "name");
+        
+        if (capabilitiesIterator == null)
+        {
+            throw new GeneralException("capabilities iterator is null");
+        }
+        
+        while (capabilitiesIterator.hasNext())
+        {
+            Object[] capabilityNameOA =
+                    (Object[]) capabilitiesIterator.next();
+            
+            String capabilityName =
+                    ObjectUtils.toString(capabilityNameOA[0]); 
+            
+            if (StringUtils.isNotBlank(capabilityName))
+            {
+                capabilitiesList.add(capabilityName);
+            }
+        }
+    }
+    finally
+    {
+        if (capabilitiesIterator != null)
+        {
+            Util.flushIterator(capabilitiesIterator);
+        }
+        
+        context.decache();
+    }
+    
+    return capabilitiesList;
+}
+
+/**
+ * Return a list of all SPRight object names.
+ */
+List getSPRights() throws GeneralException
+{
+    /**
+     * Pull a list of SPRight object names, alpha by name.  Build a list
+     * of names and return it.
+     */
+    
+    List rightsList = new ArrayList();
+    
+    QueryOptions rightsQO = new QueryOptions();
+    rightsQO.addOrdering("name", true);
+    
+    Iterator rightsIterator = null;
+    
+    try
+    {
+        rightsIterator =
+                context.search(SPRight.class, rightsQO, "name");
+        
+        if (rightsIterator == null)
+        {
+            throw new GeneralException("rights iterator is null");
+        }
+        
+        while (rightsIterator.hasNext())
+        {
+            Object[] rightNameOA = (Object[]) rightsIterator.next();
+            
+            String rightName = ObjectUtils.toString(rightNameOA[0]); 
+            
+            if (StringUtils.isNotBlank(rightName))
+            {
+                rightsList.add(rightName);
+            }
+        }
+    }
+    finally
+    {
+        if (rightsIterator != null)
+        {
+            Util.flushIterator(rightsIterator);
+        }
+        
+        context.decache();
+    }
+    
+    return rightsList;
+}
+
+/**
+ * Generate the data grid (string array) and populate it with data.
+ */
+String[][] prepareResultsGrid(
+        List listOfCapabilities, List listOfSPRights)
+                throws GeneralException
+{
+    /**
+     * Use the current capabilities/sprights lists to initialize a string
+     * array that will hold our results.  String[rows][cols].
+     */
+    
+    String[][] resultGrid =
+            new String
+                    [(listOfSPRights.size() + 1)]
+                    [(listOfCapabilities.size() + 2)];
+    
+    /**
+     * Populate the first row with header data.  This includes two static
+     * columns and all capability names.
+     */
+    
+    resultGrid[0][0] = "SPRight Name";
+    resultGrid[0][1] = "SPRight Description";
+    
+    for (int i = 0 ; i < listOfCapabilities.size() ; i++)
+    {
+        resultGrid[0][(i + 2)] =
+                ObjectUtils.toString(listOfCapabilities.get(i));
+    }
+    
+    /**
+     * Each row should begin with the SPRight name, followed by the SPRight
+     * description.  Load each SPRight by name, and use this information to
+     * populate those cells accordingly.
+     */
+    
+    int currentRecord = 0;
+    
+    for (Object spRightNameO : listOfSPRights)
+    {
+        String spRightName = ObjectUtils.toString(spRightNameO);
+        
+        if (StringUtils.isBlank(spRightName))
+        {
+            continue;
+        }
+        
+        SPRight spRight =
+                context.getObjectByName(SPRight.class, spRightName);
+        
+        if (spRight == null)
+        {
+            continue;
+        }
+        
+        currentRecord++;
+        
+        resultGrid[currentRecord][0] = spRight.getName();
+        
+        /**
+         * If a description does not contain a message key, it will return
+         * null.  To deal with nonlocalized descriptions, we utilize the 
+         * original value Internationalizer returns null.
+         */
+        
+        String spRightDescription =
+                Internationalizer.getMessage(
+                        spRight.getDescription(),
+                        Locale.getDefault());
+        
+        if (StringUtils.isNotBlank(spRightDescription))
+        {
+            resultGrid[currentRecord][1] = spRightDescription;
+        }
+        else
+        {
+            resultGrid[currentRecord][1] = spRight.getDescription();
+        }
+    }
+    
+    /**
+     * For each capability, we need to retrieve the SPRight objects
+     * granted.  When we identify an intersection of Capability and SPRight
+     * that apply, we place an X.
+     */
+    
+    for (Object capabilityNameO : listOfCapabilities)
+    {
+        String capabilityName = ObjectUtils.toString(capabilityNameO);
+        
+        if (StringUtils.isBlank(capabilityName))
+        {
+            continue;
+        }
+        
+        Capability capability =
+                context.getObjectByName(Capability.class, capabilityName);
+        
+        if (capability == null)
+        {
+            continue;
+        }
+        
+        List capabilityRights = capability.getAllRights();
+        
+        if (capabilityRights != null)
+        {
+            for (Object spRightO : capabilityRights)
+            {
+                if (spRightO == null)
+                {
+                    continue;
+                }
+                
+                SPRight spRight = (SPRight) spRightO;
+                String spRightName = spRight.getName();
+                
+                resultGrid
+                        [(listOfSPRights.indexOf(spRightName) + 1)]
+                        [(listOfCapabilities.indexOf(capabilityName) + 2)]
+                                = "X";
+            }
+        }
+        
+        context.decache();
+    }
+    
+    /**
+     * Return our result grid.
+     */
+    
+    return resultGrid;
+}
+
+/**
+ * MAIN
+ */
+
+/**
+ * Grab a list of all Capability and SPRight objects in the system.
+ */
+
+List capabilities = getCapabilities();
+List spRights = getSPRights();
+
+/**
+ * Use the current capabilities/sprights lists to initialize a string
+ * array that will hold our results.  String[rows][cols].
+ */
+
+String[][] results = prepareResultsGrid(capabilities, spRights);
+
+/**
+ * Return results
+ */
+
+return buildResult(results);
+  ]]></Source>
+</Rule>

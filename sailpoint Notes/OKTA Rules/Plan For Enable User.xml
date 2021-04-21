@@ -1,0 +1,34 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule created="" id="" language="beanshell" modified="" name="Plan For Enable User">
+  <Source>
+
+  import sailpoint.object.ProvisioningPlan;
+  import sailpoint.object.Identity;
+  import sailpoint.object.ProvisioningPlan.AccountRequest;
+  import sailpoint.object.ProvisioningPlan.AttributeRequest;
+  import sailpoint.api.Provisioner;
+  import sailpoint.object.ProvisioningProject;
+  import sailpoint.object.Attributes;
+
+
+  Identity identity = context.getObjectByName(Identity.class,"venky12696@gmail.com");
+  ProvisioningPlan plan = new ProvisioningPlan();
+  plan.setIdentity(identity);
+  AccountRequest ac = new AccountRequest();
+  ac.setApplication("OKTA");
+  ac.setOperation(AccountRequest.Operation.Enable);
+ AttributeRequest attrq = new AttributeRequest();
+  attrq.setName("status");
+  attrq.setOperation(ProvisioningPlan.Operation.Set);
+  attrq.setValue("ACTIVE");
+  ac.add(attrq);
+  plan.add(ac);
+
+  Provisioner prov = new Provisioner(context);
+  ProvisioningProject project = prov.compile(plan);
+  prov.execute(project);
+  return project.toXml();
+
+  </Source>
+</Rule>

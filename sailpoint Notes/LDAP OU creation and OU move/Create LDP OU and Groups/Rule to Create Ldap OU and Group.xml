@@ -1,0 +1,98 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule language="beanshell" name="Rule to Create Ldap OU and Group">
+  <Source>
+import java.util.Hashtable;
+
+import javax.naming.Context;
+import javax.naming.NamingEnumeration;
+import javax.naming.NamingException;
+import javax.naming.directory.Attribute;
+import javax.naming.directory.Attributes;
+import javax.naming.directory.BasicAttribute;
+import javax.naming.directory.BasicAttributes;
+import javax.naming.directory.DirContext;
+import javax.naming.directory.InitialDirContext;
+import javax.naming.directory.SearchControls;
+import javax.naming.directory.SearchResult;
+
+
+
+		String[] attrIDs = { "sn", "cn" };
+
+		SearchControls ctls = new SearchControls();
+		ctls.setReturningAttributes(attrIDs);
+
+		String ouName = "NewOU";
+		String domainName = "dc=maxcrc,dc=com";
+
+		String filter = "(ou=" + ouName + ")";
+		Hashtable env = new Hashtable ();
+  
+		env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
+		// env.put(Context.PROVIDER_URL, "yourURL");
+		env.put(Context.PROVIDER_URL, "ldap://localhost:389");
+		env.put(Context.SECURITY_AUTHENTICATION, "simple");
+		env.put(Context.SECURITY_PRINCIPAL, "cn=Manager,dc=maxcrc,dc=com");
+		env.put(Context.SECURITY_CREDENTIALS, "secret");
+
+		DirContext ctx = new InitialDirContext(env);
+
+		NamingEnumeration e = ctx.search(domainName, filter, ctls);
+
+		if (e.hasMore()) {
+      System.out.println("inside ifin ou");
+                         
+
+			while (e.hasMore()) {
+
+				SearchResult entry = (SearchResult) e.next();
+				System.out.println(entry.getName());
+			}
+		} else {
+      System.out.println("inside else");
+
+			Attributes attrs = new BasicAttributes(true); // case-ignore
+			Attribute objclass = new BasicAttribute("objectclass");
+			// objclass.add("top");
+			objclass.add("organizationalUnit");
+			// attrs.put(objclass);
+			attrs.put("ou", "smith");
+			attrs.put("objectClass", "organizationalUnit");
+
+			DirContext createSubcontext = ctx.createSubcontext("ou=" + ouName + "," + domainName, attrs);
+		}
+
+		String groupName = "Test1";
+		String groupOU = "ou=" + ouName + ",";
+		String groupFilter = "(cn=" + groupName + ")";
+
+		e = ctx.search(groupOU + domainName, groupFilter, ctls);
+
+		if (e.hasMore()) {
+      System.out.println("inside if in group");
+
+			while (e.hasMore()) {
+
+				SearchResult entry = (SearchResult) e.next();
+				System.out.println(entry.getName());
+			}
+		} else {
+      System.out.println("inside else in group");
+
+			Attributes attrs = new BasicAttributes(true); // case-ignore
+		//Attribute objclass = new BasicAttribute("objectclass");
+			// objclass.add("top");
+		//	objclass.add("organizationalUnit");
+			// attrs.put(objclass);
+			attrs.put("ou", ouName);
+			attrs.put("objectClass", "groupOfUniqueNames");
+		attrs.put("uniqueMember", "cn=Robert Smith,ou=People,dc=maxcrc,dc=com");
+
+			DirContext createSubcontext = ctx.createSubcontext("cn=" + groupName + "," + groupOU + domainName, attrs);
+
+		}
+return "Ok";
+
+ </Source>
+</Rule>

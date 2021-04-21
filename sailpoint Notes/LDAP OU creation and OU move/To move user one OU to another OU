@@ -1,0 +1,56 @@
+*****************************
+To move user one OU to another OU
+**************************************************8
+
+
+		 public String moveGlobalPassAccounts(Hashtable env, String oldUserDn, String newUserDn, String cscSMLoginDisabledValue) 
+        throws GeneralException {
+          try {
+            LdapContext ctx = new InitialLdapContext(env, null);
+            ruleLog.debug(". .trying to rename the link. .");
+
+            ModificationItem[] mods = new ModificationItem[1];       
+            Attribute mod0 = new BasicAttribute("cscSMLoginDisabled", cscSMLoginDisabledValue);
+            mods[0] = new ModificationItem(DirContext.REPLACE_ATTRIBUTE, mod0);
+            
+            //change disable flag in eDir
+            //ctx.modifyAttributes(oldUserDn, mods);
+            //change user OU in eDir
+            ctx.rename(oldUserDn, newUserDn);
+            ruleLog.debug("context: " + ctx);
+            ctx.close();
+            return "success";
+          } catch (NamingException e) {
+            ruleLog.debug("Moving OU failed: " + e);
+            return "error: " + e;
+          }
+
+        }
+ Application application = context.getObjectByName(Application.class, appName);
+        String ldapURL = application.getAttributes().getString("host");
+        String port = application.getAttributes().getString("port");
+        String adminName = application.getAttributes().getString("user");
+        String password = application.getAttributes().getString("password");
+		
+		String pwd = context.decrypt(password);
+        ldapURL = "ldap://" + ldapURL;
+		
+		  Hashtable env = new Hashtable();
+
+        Identity identity = context.getObjectByName(Identity.class, identityName);
+
+        //setup environment variables
+        env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
+        env.put(Context.SECURITY_AUTHENTICATION, "simple");
+        env.put(Context.SECURITY_PRINCIPAL, adminName);
+        env.put(Context.SECURITY_CREDENTIALS, pwd);
+        env.put("java.naming.ldap.deleteRDN", "false");
+        env.put(Context.PROVIDER_URL, ldapURL);
+        if (null != port &amp;&amp; "636".equalsIgnoreCase(port)) 
+				env.put(Context.SECURITY_PROTOCOL, "ssl");
+				
+				  if (!oldUserDn.equals(newUserDn)) {
+                    result = moveGlobalPassAccounts(env, oldUserDn, newUserDn, cscSMLoginDisabled);
+                } else {
+                    result = "Account not moved!! account already in destination OU: " + newUserDn;
+                }

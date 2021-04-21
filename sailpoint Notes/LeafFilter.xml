@@ -1,0 +1,91 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule created="" id="" language="beanshell" modified="" name="LeafFilter" type="RequestObjectSelector">
+  <Source>
+  import java.util.ArrayList;
+  import java.util.*;
+
+  import sailpoint.api.SailPointContext;
+  import sailpoint.object.Attributes;
+  import sailpoint.object.Bundle;
+  import sailpoint.object.Filter;
+  import sailpoint.object.Filter.LeafFilter;
+  import sailpoint.object.Identity;
+  import sailpoint.object.Link;
+  import sailpoint.object.Profile;
+  import sailpoint.tools.GeneralException;
+
+  System.out.println("*****rule is startedd*****");
+  
+  List itroles=new ArrayList();
+  List misingentitlements=new ArrayList();
+  List constrintsList = new ArrayList();
+  List entList=new ArrayList();
+ 
+    List identity = context.getObjects(Identity.class);
+   
+    for (Identity identity2 : identity)
+    
+	{
+
+		List links = identity2.getLinks();
+     
+      for (Link link : links)
+      {
+        Attributes entitlementAttributes = link.getEntitlementAttributes();
+    
+        List keys = entitlementAttributes.getKeys();
+
+        for (String object : keys)
+        {
+          entList = (List) entitlementAttributes.get(object);
+          System.out.println("entList is::" + entList);
+
+        }
+        List  assignedRoles = identity2.getAssignedRoles();
+    
+        for (Bundle bundle : assignedRoles)
+        {
+          itroles.addAll(bundle.getRequirements());
+          itroles.addAll(bundle.getPermits());
+          
+          for (Bundle itRole : itroles)
+          {
+       
+            List  profiles = itRole.getProfiles();
+        
+            for (Profile profile : profiles)
+            {
+              List constraints = profile.getConstraints();
+           
+              for (LeafFilter filter: constraints) 
+              {
+               
+               List constrintsList2 = (List) filter.getValue();
+							
+				for (Object object : constrintsList2) 
+				{
+					if(!constrintsList.contains(object))
+                    constrintsList.add(object);
+								
+				}
+              }		
+            }
+          }
+        }
+
+      }
+  for (String ent : entList) 
+  {
+				
+	constrintsList.remove(ent);
+				
+	}
+			
+	System.out.println(identity2.getName()+" Missing Roles Are @@@@ :: "+constrintsList);
+
+    }
+ 
+  return "sucess";
+  </Source>
+</Rule>

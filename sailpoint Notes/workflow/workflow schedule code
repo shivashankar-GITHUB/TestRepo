@@ -1,0 +1,58 @@
+          import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+
+import sailpoint.api.SailPointContext;
+
+import sailpoint.object.Identity;
+import sailpoint.object.ProvisioningPlan;
+import sailpoint.object.Attributes;
+import sailpoint.api.RequestManager;
+import sailpoint.object.Request;
+import sailpoint.object.RequestDefinition;
+import sailpoint.workflow.StandardWorkflowHandler;
+import sailpoint.object.Workflow;
+import sailpoint.object.ProvisioningPlan.AccountRequest;
+
+          
+		ProvisioningPlan plan = new ProvisioningPlan();
+		Identity identityObject = context.getObjectByName(Identity.class, identityName);
+		plan.setIdentity(identityObject);
+		List accreqs = new ArrayList();
+		AccountRequest acctReq = new AccountRequest();
+		acctReq.setOperation(AccountRequest.Operation.Disable);
+		acctReq.setNativeIdentity("CN="+identityName+",CN=Users,DC=seri,DC=sailpointdemo,DC=com");
+		String adApp ="AD Application";
+		acctReq.setApplication(adApp);
+		accreqs.add(acctReq);
+		plan.setAccountRequests(accreqs);
+		String workflowName = "User Workflow";
+		String caseName = "Run '" + workflowName + "' for: " + identityName;
+		String requesterId = "spadmin";
+		Workflow eventWorkflow = context.getObject(Workflow.class, workflowName);
+		Identity id = context.getObjectByName(Identity.class, requesterId);
+		int x = 0;
+		long launchTime = System.currentTimeMillis() + 432000000 + x;
+		caseName = caseName + "(" + launchTime + ")";
+		Attributes reqArgs = new Attributes();
+		reqArgs.put(StandardWorkflowHandler.ARG_REQUEST_DEFINITION,
+				sailpoint.request.WorkflowRequestExecutor.DEFINITION_NAME);
+		reqArgs.put(sailpoint.workflow.StandardWorkflowHandler.ARG_WORKFLOW, workflowName);
+		reqArgs.put(sailpoint.workflow.StandardWorkflowHandler.ARG_REQUEST_NAME, caseName);
+		reqArgs.put("requestName", caseName);
+		Attributes wfArgs = new Attributes();
+		wfArgs.put("identityName", identityName);
+		wfArgs.put("plan", plan);
+		wfArgs.put("workflow", eventWorkflow.getId());
+		reqArgs.putAll(wfArgs);
+		Request req = new Request();
+		RequestDefinition reqdef = context.getObject(RequestDefinition.class, "Workflow Request");
+		req.setDefinition(reqdef);
+		req.setEventDate(new Date(launchTime));
+		req.setOwner(id);
+		req.setName(caseName);
+		req.setAttributes(reqdef, reqArgs);
+		System.out.println("After request object");
+		RequestManager.addRequest(context, req);
+		System.out.println("Returning plan 1:\n" + plan.toXml());
